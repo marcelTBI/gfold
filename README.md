@@ -3,6 +3,15 @@ gfold
 
 Boltzman sampling of RNA secondary structures with support of pseudoknots of type genus 1 (1-structures).
 
+To compile and run it, do:
+aclocal
+autoconf
+automake --add-missing
+./configure
+make
+src/gfold
+
+
 Firstly done by Fenix Huang as a part of paper: 
 Topology and prediction of RNA pseudoknots (Reidys, Christian M. and Huang, Fenix W. D. and Andersen, Jørgen E. and Penner, Robert C. and Stadler, Peter F. and Nebel, Markus E.) published in Bioinformatics 2011
 
