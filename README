@@ -1,0 +1,56 @@
+How to install:
+The package is compressed in a tar.gz file, and it is compiled by automake.
+In order to compile the package, using the command:
+
+$>tar -zxvf gfold.tar.gz
+$>cd gfold
+$>./configure
+$>make
+
+
+How to run the program:
+The execute file "gold" is in the directory "./src". Use command
+
+$>./src/gold [-I input.in] [-O output.out]
+
+to execute the program. 
+
+Options:
+
+[-I input.in]
+
+This option specifies the input file. In this file, the input must be the following format. For each input sequence, it takes three lines:  
+
+name of the sequence
+input sequence
+natural structure
+
+If the name of sequence or the natural structure of the sequence is unknown, put "X" for the name and put "." for the natural structure. Missing the three information for the input may make the input wrong.
+
+Here we give an example for the input:
+tRNA
+ACCACGCUUAAGACACCUAGCUUGUGUCCUGGAGGUCUAAAAGUCAGACCGCGAGAGGGUUGACUCGAUUUAGGCG
+::::((((((((((::((((::::::::))))::)))):::((((((:((:(::::))))))))):::::))))))
+
+In one input file you can put more than one input sequence. Put the input as the formate shown above one by one.
+
+We give some input example of the input files in the ./In folder. 
+
+[-O output.out]
+
+this option is optional, you can use it to specify the output file where you can find the result of the program. If you do not use it, the default output file is output.out, you can find the result of the program there.
+
+
+The output file:
+
+In the output file, we list the following information:
+1 The input
+2 The energy parameters for the four types of pseudoknot using in the program
+3 MFE structure, the sensitivity and PPV (positive predicted value)
+4 The genus distribution for the sampling structures (10,000 samples).
+5 The base pairs whose probability is above a given threshold, and their PPV.
+
+If there is any question about this program, please contact me (Fenix, fenixprotoss@gmail.com).
+
+
+
