@@ -4,6 +4,7 @@ gfold
 Boltzman sampling of RNA secondary structures with support of pseudoknots of type genus 1 (1-structures).
 
 To compile and run it, do:
+<edit the variable VIENNARNA in file Makefile.am to point to your distribution of ViennaRNA package (http://www.tbi.univie.ac.at/RNA/)>
 aclocal
 autoconf
 automake --add-missing

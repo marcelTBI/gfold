@@ -1,3 +1,9 @@
+# edit:
+
+# path to your distribution of ViennaRNA package (version 2.1.7 is tested to work)
+VIENNARNA = $(HOME)/software/ViennaRNA-2.1.7
+
+# do not edit:
 AUTOMAKE_OPTIONS=foreign
 bin_PROGRAMS=gfold
 gfold_SOURCES=aln_util.h  energy_const.h  energy_par.c \
@@ -18,8 +24,6 @@ main.o: gfold_cmdline.o
 
 gfold_cmdline.c: gfold.ggo
 	gengetopt -i gfold.ggo
-
-VIENNARNA = $(HOME)/software/ViennaRNA-2.1.7
 
 LDADD = $(OPENMP_CFLAGS) -lm $(VIENNARNA)/lib/libRNA.a
 AM_CPPFLAGS = -I$(VIENNARNA)/H -I$(VIENNARNA)/lib
