@@ -1662,9 +1662,12 @@ char *samplestructure (char *seq, int samples)
 	length=strlen(seq);
 
 	pfunc_initial(length);
-	update_fold_params();
-	if (PARS) free(PARS);
-	PARS = scale_parameters();
+	
+	if (!PARS) {
+		update_fold_params();
+		PARS = scale_parameters();
+	}
+	
 	encode_seq(seq);
 
 	for (i=0;i<10;i++)

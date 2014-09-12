@@ -1393,8 +1393,7 @@ void symbFold(char *seq)
 
 	initial(length);
 	update_fold_params();
-	if (PARS) free(PARS);
-	PARS = scale_parameters();
+	if (!PARS) PARS = scale_parameters();
 	encode_seq(seq);
 	fillarray(seq);
 
