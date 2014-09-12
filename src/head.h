@@ -52,7 +52,7 @@
 double betaScale;
 extern double betaScale;
 
-#define EXP(G) expl(-1*(10*(G))/(betaScale*R*(P->temperature+K0)))
+#define EXP(G) expl(-1*(10*(G))/(betaScale*R*(PARS->temperature+K0)))
 
 int b1,b1m,b1p,b2,b2m,b2p,b3,b3m,b3p,b4,b4m,b4p;
 extern int b1;
@@ -95,8 +95,8 @@ struct block
 };
 
 
-int *S;
-extern int *S;
+int *SEQ;
+extern int *SEQ;
 
 int mfe;
 extern int mfe;
@@ -140,7 +140,7 @@ extern int compare(int *a, int *b);
 extern int number(int *a);
 
 
-paramT *P;
+paramT *PARS;
 long *indx4[4];
 int *c,*fML,*fML1,*fPL1, *fPL,*indx2;
 int *f5,*f51, *I51, *I5, *IML1, *IML, *IPL1, *IPL, *Ibc;
@@ -148,7 +148,7 @@ int *Gtight, *Gu, *Guep, *Gv, *Gw, *Gumm;
 int *Gump, *Gvm, *Gwm, *Gup, *Gvp, *Gwp;
 int *Gh, *Gvep, *Gvmp;
 
-extern paramT *P;
+extern paramT *PARS;
 extern long *indx4[4];
 extern int *c,*fML,*fML1,*fPL1, *fPL,*indx2;
 extern  int *f5,*f51, *I51, *I5, *IML1, *IML, *IPL1, *IPL, *Ibc;

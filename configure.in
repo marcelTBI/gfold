@@ -17,6 +17,10 @@ AC_PROG_CC
 # FIXME: Replace `main' with a function in `-lm':
 AC_CHECK_LIB([m], [main])
 
+dnl Check for OpenMP and prepare flags
+AC_OPENMP
+AC_SUBST(OPENMP_CFLAGS)
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([malloc.h stdlib.h string.h])

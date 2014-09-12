@@ -132,24 +132,24 @@ void fillarray(const char *seq)
 	  for (i=1;i<length;i++) {
 	    j=i+gap;
 */
-	    type = BP_pair[S[i]][S[j]];
+	    type = BP_pair[SEQ[i]][SEQ[j]];
 	    if (type) {
-	      c[indx2[j]+i] = HairpinE(j-i-1, type, S[i+1], S[j-1], seq+i-1);
+	      c[indx2[j]+i] = HairpinE(j-i-1, type, SEQ[i+1], SEQ[j-1], seq+i-1);
 
 	      for (p = i+1; p <= j-2-TURN; p++) {
 	        for (q = p+TURN; q < j; q++) {
-	          type2 = BP_pair[S[p]][S[q]];
+	          type2 = BP_pair[SEQ[p]][SEQ[q]];
 
 	          if (type2==0) continue;
 	          type2 = rtype[type2];
 
 	          G = LoopEnergy(p-i-1, j-q-1, type, type2,
-				S[i+1], S[j-1], S[p-1], S[q+1]);
+				SEQ[i+1], SEQ[j-1], SEQ[p-1], SEQ[q+1]);
 	          if (G+c[indx2[q]+p] < c[indx2[j]+i]) c[indx2[j]+i]=G+c[indx2[q]+p];
 	        }
 	      }
 	      for (k1=i+1;k1<j-1;k1++) {
-	        G=P->MLintern[type]+P->MLclosing;
+	        G=PARS->MLintern[type]+PARS->MLclosing;
 	        if (fML1[indx2[k1]+i+1]+fML[indx2[j-1]+k1+1]+G < c[indx2[j]+i])
 	          c[indx2[j]+i]=fML1[indx2[k1]+i+1]+fML[indx2[j-1]+k1+1]+G;
 	      }
@@ -159,8 +159,8 @@ void fillarray(const char *seq)
 
 	    f51[indx2[j]+i]=MAXENG;
 	    for (k1=i;k1<j;k1++) {
-	      type = BP_pair[S[k1]][S[j]];
-	      if (type>2) G=P->TerminalAU; else G=0;
+	      type = BP_pair[SEQ[k1]][SEQ[j]];
+	      if (type>2) G=PARS->TerminalAU; else G=0;
 	      if (type && c[indx2[j]+k1]+G < f51[indx2[j]+i]) f51[indx2[j]+i]=c[indx2[j]+k1]+G;
 
 	    }
@@ -175,9 +175,9 @@ void fillarray(const char *seq)
 
 	    fML1[indx2[j]+i]=MAXENG;
 	    for (k1=i;k1<j;k1++) {
-	      type=BP_pair[S[k1]][S[j]];
+	      type=BP_pair[SEQ[k1]][SEQ[j]];
 	      if (type) {
-	        G=P->MLintern[type]+(k1-i)*P->MLbase;
+	        G=PARS->MLintern[type]+(k1-i)*PARS->MLbase;
 	        if (c[indx2[j]+k1]+G < fML1[indx2[j]+i])
 	          fML1[indx2[j]+i] = c[indx2[j]+k1]+G;
 	      }
@@ -189,13 +189,13 @@ void fillarray(const char *seq)
 	    for (k1=i;k1<j;k1++) {
 	      if (fML1[indx2[k1]+i]+fML[indx2[j]+k1+1] < fML[indx2[j]+i])
 	        fML[indx2[j]+i]=fML1[indx2[k1]+i]+fML[indx2[j]+k1+1];
-	      if (fML1[indx2[k1]+i]+(j-k1)*P->MLbase < fML[indx2[j]+i])
-	        fML[indx2[j]+i]=fML1[indx2[k1]+i]+(j-k1)*P->MLbase;
+	      if (fML1[indx2[k1]+i]+(j-k1)*PARS->MLbase < fML[indx2[j]+i])
+	        fML[indx2[j]+i]=fML1[indx2[k1]+i]+(j-k1)*PARS->MLbase;
 	    }
 
 	    fPL1[indx2[j]+i]=MAXENG;
 	    for (k1=i;k1<j;k1++) {
-	      type=BP_pair[S[k1]][S[j]];
+	      type=BP_pair[SEQ[k1]][SEQ[j]];
 	      if (type) {
 	        G=BETA2+(k1-i)*BETA3;
 	        if (c[indx2[j]+k1]+G < fPL1[indx2[j]+i])
@@ -214,40 +214,40 @@ void fillarray(const char *seq)
 	    }
 // secondary structure S done!
 
-	    type1=BP_pair[S[i]][S[j]];
+	    type1=BP_pair[SEQ[i]][SEQ[j]];
 	    for (r=i+1;r<j-1;r++)
 	      for (s=j-1;s>r;s--) {
 // 	      for (s=r+1;s<=j-1;s++) {
-	        type2=BP_pair[S[s]][S[r]];
+	        type2=BP_pair[SEQ[s]][SEQ[r]];
 	        index=indx4[0][i]+indx4[1][r]+indx4[2][s]+indx4[3][j];
 	        score=MAXENG;
 	        if (type1 && type2 && s-r>TURN) { // start Gtight
 	          score=(int)(SIGMA*LoopEnergy(r-i-1,j-s-1,type1,type2,
-		  S[i+1],S[j-1],S[r-1],S[s+1]));
+		  SEQ[i+1],SEQ[j-1],SEQ[r-1],SEQ[s+1]));
 // G is empty, it is big interior loop
 	          for (k1=i+1;k1<r;k1++)
 	            for (k2=s+1;k2<j;k2++) {
-	              typek=BP_pair[S[k2]][S[k1]];
+	              typek=BP_pair[SEQ[k2]][SEQ[k1]];
 	              if (typek) {
 	                G=(int)(SIGMA*LoopEnergy(k1-i-1,j-k2-1,type1,typek,
-		S[i+1],S[j-1],S[k1-1],S[k2+1]));
+		SEQ[i+1],SEQ[j-1],SEQ[k1-1],SEQ[k2+1]));
 	                if (G+Gtight[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][k2]] < score)
 	                  score=G+Gtight[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][k2]];
 // G is an interior loop plus another G
 
-	                G=P->MLclosing+P->MLintern[type1];
+	                G=PARS->MLclosing+PARS->MLintern[type1];
 	                if (k1-i>1) {
 	                  if (G+Gtight[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][k2]]
-		+(j-k2-1)*P->MLbase+IML[indx2[k1-1]+i+1] < score)
+		+(j-k2-1)*PARS->MLbase+IML[indx2[k1-1]+i+1] < score)
 	                  score=G+Gtight[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][k2]]
-		+(j-k2-1)*P->MLbase+IML[indx2[k1-1]+i+1];
+		+(j-k2-1)*PARS->MLbase+IML[indx2[k1-1]+i+1];
 	                }
 // G is a miltiloop, and the rhs. is empty
 	                if (j-k2>1) {
 	                  if (G+Gtight[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][k2]]
-		+(k1-i-1)*P->MLbase+IML[indx2[j-1]+k2+1] < score)
+		+(k1-i-1)*PARS->MLbase+IML[indx2[j-1]+k2+1] < score)
 		          score=G+Gtight[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][k2]]
-		+(k1-i-1)*P->MLbase+IML[indx2[j-1]+k2+1];
+		+(k1-i-1)*PARS->MLbase+IML[indx2[j-1]+k2+1];
 	                }
 // G is a miltiloop, and the lhs. is empty
 	                if (k1-i>1 && j-k2>1) {
@@ -265,10 +265,10 @@ void fillarray(const char *seq)
 // BEAT2 is the penalty for the inner base pair contributes to pseudoknot.
 
 	        score=MAXENG;
-	        type1=BP_pair[S[i]][S[j]];
+	        type1=BP_pair[SEQ[i]][SEQ[j]];
 	        if (type1) {
 	          for (k2=s>r+TURN?s:r+TURN; k2<j; k2++) {
-	            type2=BP_pair[S[r]][S[k2]];
+	            type2=BP_pair[SEQ[r]][SEQ[k2]];
 	            if (type2==0) continue;
 	            if (k2-s>0) {
 	              right=IPL[indx2[k2-1]+s];
@@ -284,8 +284,8 @@ void fillarray(const char *seq)
 
 	        score=MAXENG;
 	        for (k1=i;k1<r;k1++) {
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
-	          if (BP_pair[S[k1]][S[j]]>2) G=P->TerminalAU; else G=0;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]>2) G=PARS->TerminalAU; else G=0;
 	          if (k1-i>0) left=I5[indx2[k1-1]+i]; else left=0;
 	          if (left+Gh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]+G < score)
 	            score=left+Gh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]+G;
@@ -295,8 +295,8 @@ void fillarray(const char *seq)
 
 	        score=MAXENG;
 	        for (k1=i;k1<r;k1++) {
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
-	          if (BP_pair[S[k1]][S[j]]>2) G=P->TerminalAU; else G=0;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]>2) G=PARS->TerminalAU; else G=0;
 	          if (k1-i>0) {
 	            left=IPL[indx2[k1-1]+i];
 	            if ((k1-i)*BETA3 < left) left=(k1-i)*BETA3;
@@ -310,14 +310,14 @@ void fillarray(const char *seq)
 
 	        score=MAXENG;
 	        for (k1=i;k1<r;k1++) { 
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
 	          if (k1-i>0) {
 	            left=IML[indx2[k1-1]+i];
-	            if ((k1-i)*P->MLbase < left) left=(k1-i)*P->MLbase;
+	            if ((k1-i)*PARS->MLbase < left) left=(k1-i)*PARS->MLbase;
 	          } else 
 	            left=0;
-	          typek=BP_pair[S[k1]][S[j]];
-	          G=P->MLintern[typek];
+	          typek=BP_pair[SEQ[k1]][SEQ[j]];
+	          G=PARS->MLintern[typek];
 	          if (left+Gh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]+G < score)
 	            score=left+Gh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]+G;
 	        }
@@ -326,14 +326,14 @@ void fillarray(const char *seq)
 
 	        score=MAXENG;
 	        for (k1=i;k1<r;k1++) {
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
 	          if (k1-i>0) {
 	            left=IPL[indx2[k1-1]+i];
 	            if ((k1-i)*BETA3 < left) left=(k1-i)*BETA3;
 	          } else 
 	            left=0;
-	          typek=BP_pair[S[k1]][S[j]];
-	          G=P->MLintern[typek];
+	          typek=BP_pair[SEQ[k1]][SEQ[j]];
+	          G=PARS->MLintern[typek];
 	          if (left+Gh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]+G < score)
 	            score=left+Gh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]+G;
 	        }
@@ -342,7 +342,7 @@ void fillarray(const char *seq)
 
 	        score=MAXENG;
 	        for (k1=i;k1<r;k1++) {
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
 	          if (k1-i>0) {
 	            left=IPL[indx2[k1-1]+i];
 	            if ((k1-i)*BETA3 < left) left=(k1-i)*BETA3;
@@ -463,26 +463,26 @@ void fillarray(const char *seq)
 // 4-dimensin matrix done!
 
 	    score=MAXENG;
-	    type = BP_pair[S[i]][S[j]];
+	    type = BP_pair[SEQ[i]][SEQ[j]];
 	    if (type) {
 	      for (k1=i+1;k1<j;k1++)
 	        for (k2=k1+TURN;k2<j;k2++) {
-	          type2=BP_pair[S[k2]][S[k1]];
+	          type2=BP_pair[SEQ[k2]][SEQ[k1]];
 	          if (type2) {
 	            G=LoopEnergy(k1-i-1,j-k2-1,type,type2,
-		S[i+1],S[j-1],S[k1-1],S[k2+1]);
+		SEQ[i+1],SEQ[j-1],SEQ[k1-1],SEQ[k2+1]);
 	            score=G+Ibc[indx2[k2]+k1];
 
-	            G=P->MLclosing+P->MLintern[type]+P->MLintern[type2];
+	            G=PARS->MLclosing+PARS->MLintern[type]+PARS->MLintern[type2];
 	            if (k1-i>1) {
 	              left=IML[indx2[k1-1]+i+1];
-	              right=(j-k2-1)*P->MLbase;
+	              right=(j-k2-1)*PARS->MLbase;
 	              if (left+right+G+Ibc[indx2[k2]+k1] < score)
 	                score=left+right+G+Ibc[indx2[k2]+k1];
 	            }
 
 	            if (j-k2>1) {
-	              left=(k1-i-1)*P->MLbase;
+	              left=(k1-i-1)*PARS->MLbase;
 	              right=fML[indx2[j-1]+k2+1]; 
 	              if (left+right+G+Ibc[indx2[k2]+k1] < score)
 	                score=left+right+G+Ibc[indx2[k2]+k1];
@@ -496,12 +496,12 @@ void fillarray(const char *seq)
 	            }
 	          }
 	      }
-	      G=P->MLclosing+P->MLintern[type];
+	      G=PARS->MLclosing+PARS->MLintern[type];
 	      for (k1=i+TURN;k1<=j-1;k1++) {
 	        left=IML1[indx2[k1]+i+1];
 	        if (k1<j-1) {
 	          right=fML[indx2[j-1]+k1+1];
-	          if ((j-1-k1)*P->MLbase < right) right = (j-1-k1)*P->MLbase;
+	          if ((j-1-k1)*PARS->MLbase < right) right = (j-1-k1)*PARS->MLbase;
 	        } else 
 	          right=0;
 	        if (G+left+right < score) score=G+left+right;
@@ -542,8 +542,8 @@ void fillarray(const char *seq)
 	    }
 	    for (r=i;r<j;r++)
 	      for (s=r+TURN;s<=j;s++) {
-	        type2 = BP_pair[S[r]][S[s]];
-	        if (type2>2) G=P->TerminalAU; else G=0;
+	        type2 = BP_pair[SEQ[r]][SEQ[s]];
+	        if (type2>2) G=PARS->TerminalAU; else G=0;
 	        if (type2) {
 	          if (r-i>0) left=I5[indx2[r-1]+i]; else left=0;
 	          if (j-s>0) right=f5[indx2[j]+s+1]; else right=0;
@@ -581,22 +581,22 @@ void fillarray(const char *seq)
 	    if (IML1[indx2[j]+i]<score) score = IML1[indx2[j]+i];
 	    for (r=i+1;r<j;r++) {
 	      right=fML[indx2[j]+r+1];
-	      if ((j-r)*P->MLbase < right) right=(j-r)*P->MLbase;
+	      if ((j-r)*PARS->MLbase < right) right=(j-r)*PARS->MLbase;
 	      if (IML1[indx2[r]+i]+right < score)
 	        score=IML1[indx2[r]+i]+right;
 	    }
 	    for (r=i;r<j;r++)
 	      for (s=r+TURN;s<=j;s++) {
-	        type=BP_pair[S[r]][S[s]];
+	        type=BP_pair[SEQ[r]][SEQ[s]];
 	        if (type==0) continue;
-	        G=P->MLintern[type];
+	        G=PARS->MLintern[type];
 	        if (r>i) {
 	          left=IML[indx2[r-1]+i];
-	          if ((r-i)*P->MLbase < left) left=(r-i)*P->MLbase;
+	          if ((r-i)*PARS->MLbase < left) left=(r-i)*PARS->MLbase;
 	        }else left=0;
 	        if (s<j) {
 	          right=fML[indx2[j]+s+1];
-	          if ((j-s)*P->MLbase < right) right=(j-s)*P->MLbase;
+	          if ((j-s)*PARS->MLbase < right) right=(j-s)*PARS->MLbase;
 	        } else right=0;
 	        if (G+left+right+Ibc[indx2[s]+r] < score) 
 	          score=G+left+right+Ibc[indx2[s]+r];
@@ -637,7 +637,7 @@ void fillarray(const char *seq)
 	    }
 	    for (r=i;r<j;r++)
 	      for (s=r+TURN;s<=j;s++) {
-	        type=BP_pair[S[r]][S[s]];
+	        type=BP_pair[SEQ[r]][SEQ[s]];
 	        if (type==0) continue;
 	        G=BETA2;
 	        if (r>i) { 
@@ -665,25 +665,25 @@ void de_I(block *T, const char *seq)
 
 	switch (T->type) {
 	case 0:   //decompose Ibc
-	  type = BP_pair[S[T->i]][S[T->j]];
+	  type = BP_pair[SEQ[T->i]][SEQ[T->j]];
 	  if (type) {
 	    ptable[T->i]=T->j;
 	    ptable[T->j]=T->i;
 	    for (k1=T->i+1;k1<T->j;k1++)
 	      for (k2=k1+TURN;k2<T->j;k2++) {
-	        type2=BP_pair[S[k2]][S[k1]];
+	        type2=BP_pair[SEQ[k2]][SEQ[k1]];
 	        if (type2) {
 	          G=LoopEnergy(k1-T->i-1,T->j-k2-1,type,type2,
-		  S[T->i+1],S[T->j-1],S[k1-1],S[k2+1]);
+		  SEQ[T->i+1],SEQ[T->j-1],SEQ[k1-1],SEQ[k2+1]);
 	          if (T->value==G+Ibc[indx2[k2]+k1]) {
 	            pushblock(k1,k2,0,0,0,Ibc[indx2[k2]+k1]);
 	            return;
 	          }
 
-	          G=P->MLclosing+P->MLintern[type]+P->MLintern[type2];
+	          G=PARS->MLclosing+PARS->MLintern[type]+PARS->MLintern[type2];
 	          if (k1-T->i>1) {
 	            left=IML[indx2[k1-1]+T->i+1]; 
-	            right=(T->j-k2-1)*P->MLbase;
+	            right=(T->j-k2-1)*PARS->MLbase;
 	            if (T->value==left+right+G+Ibc[indx2[k2]+k1]) {
 	              pushblock(k1,k2,0,0,0,Ibc[indx2[k2]+k1]);
 	              pushblock(T->i+1,k1-1,0,0,2,left);
@@ -692,7 +692,7 @@ void de_I(block *T, const char *seq)
 	          }
 
 	          if (T->j-k2>1) {
-	            left=(k1-T->i-1)*P->MLbase;
+	            left=(k1-T->i-1)*PARS->MLbase;
 	            right=fML[indx2[T->j-1]+k2+1]; 
 	            if (T->value==left+right+G+Ibc[indx2[k2]+k1]) {
 	              pushblock(k1,k2,0,0,0,Ibc[indx2[k2]+k1]);
@@ -713,14 +713,14 @@ void de_I(block *T, const char *seq)
 	          }
 	        }
 	    }
-	    G=P->MLclosing+P->MLintern[type];
+	    G=PARS->MLclosing+PARS->MLintern[type];
 	    for (k1=T->i+TURN;k1<=T->j-1;k1++) {
 	      left=IML1[indx2[k1]+T->i+1];
 	      if (k1<T->j-1) {
 	        right=fML[indx2[T->j-1]+k1+1];
 	        flag2=1;
-	        if ((T->j-1-k1)*P->MLbase < right) {
-	          right = (T->j-1-k1)*P->MLbase;
+	        if ((T->j-1-k1)*PARS->MLbase < right) {
+	          right = (T->j-1-k1)*PARS->MLbase;
 	          flag2=0;
 	        }
 	      } else 
@@ -752,8 +752,8 @@ void de_I(block *T, const char *seq)
 	  }
 	  for (k1=T->i;k1<T->j;k1++)
 	    for (k2=k1+TURN; k2<=T->j;k2++) {
-	      type2 = BP_pair[S[k1]][S[k2]];
-	      if (type2>2) G=P->TerminalAU; else G=0;
+	      type2 = BP_pair[SEQ[k1]][SEQ[k2]];
+	      if (type2>2) G=PARS->TerminalAU; else G=0;
 	      if (k1-T->i>0) left=I5[indx2[k1-1]+T->i]; else left=0;
 	      if (T->j-k2>0) right=f5[indx2[T->j]+k2+1]; else right=0;
 	      if (T->value==G+left+right+Ibc[indx2[k2]+k1]) {
@@ -779,16 +779,16 @@ void de_I(block *T, const char *seq)
 	      pushblock(k1+1,T->j,0,0,12,fML[indx2[T->j]+k1+1]);
 	      return;
 	    }
-	    if (T->value==IML1[indx2[k1]+T->i]+(T->j-k1)*P->MLbase) {
+	    if (T->value==IML1[indx2[k1]+T->i]+(T->j-k1)*PARS->MLbase) {
 	      pushblock(T->i,k1,0,0,5,IML1[indx2[k1]+T->i]);
 	      return;
 	    }
 	  }
 	  for (k1=T->i;k1<T->j;k1++)
 	    for (k2=k1+TURN;k2<=T->j;k2++) {
-	      type=BP_pair[S[k1]][S[k2]];
+	      type=BP_pair[SEQ[k1]][SEQ[k2]];
 	      if (type==0) continue;
-	      G=P->MLintern[type];
+	      G=PARS->MLintern[type];
 	      if (k1>T->i) left=IML[indx2[k1-1]+T->i]; else left=0;
 	      if (k2<T->j) right=fML[indx2[T->j]+k2+1]; else right=0;
 	      if (k1>T->i && k2<T->j) {
@@ -800,20 +800,20 @@ void de_I(block *T, const char *seq)
 	        }
 	      }
 	      if (k1>T->i) {
-	        if (T->value==G+left+(T->j-k2)*P->MLbase+Ibc[indx2[k2]+k1]) {
+	        if (T->value==G+left+(T->j-k2)*PARS->MLbase+Ibc[indx2[k2]+k1]) {
 	          pushblock(k1,k2,0,0,0,Ibc[indx2[k2]+k1]);
 	          pushblock(T->i,k1-1,0,0,2,left);
 	          return;
 	        }
 	      }
 	      if (k2<T->j) {
-	        if (T->value==G+(k1-T->i)*P->MLbase+right+Ibc[indx2[k2]+k1]) {
+	        if (T->value==G+(k1-T->i)*PARS->MLbase+right+Ibc[indx2[k2]+k1]) {
 	          pushblock(k1,k2,0,0,0,Ibc[indx2[k2]+k1]);
 	          pushblock(k2+1,T->j,0,0,12,right);
 	          return;
 	        }
 	      }
-	      if (T->value==G+(k1-T->i)*P->MLbase+(T->j-k2)*P->MLbase+Ibc[indx2[k2]+k1]) {
+	      if (T->value==G+(k1-T->i)*PARS->MLbase+(T->j-k2)*PARS->MLbase+Ibc[indx2[k2]+k1]) {
 	        pushblock(k1,k2,0,0,0,Ibc[indx2[k2]+k1]);
 	        return;
 	      }
@@ -841,7 +841,7 @@ void de_I(block *T, const char *seq)
 	  }
 	  for (k1=T->i;k1<T->j;k1++)
 	    for (k2=k1+TURN;k2<=T->j;k2++) {
-	      type=BP_pair[S[k1]][S[k2]];
+	      type=BP_pair[SEQ[k1]][SEQ[k2]];
 	      if (type==0) continue;
 	      G=BETA2;
 	      if (k1>T->i) left=IPL[indx2[k1-1]+T->i]; else left=0;
@@ -956,27 +956,27 @@ void de_I(block *T, const char *seq)
 	  }
 	  break;
 	case 10: //decompose c
-	  type=BP_pair[S[T->i]][S[T->j]];
+	  type=BP_pair[SEQ[T->i]][SEQ[T->j]];
 	  if (type) {
 	    ptable[T->i]=T->j;
 	    ptable[T->j]=T->i;
-	    G=HairpinE(T->j-T->i-1, type, S[T->i+1], S[T->j-1], seq+T->i-1);
+	    G=HairpinE(T->j-T->i-1, type, SEQ[T->i+1], SEQ[T->j-1], seq+T->i-1);
 	    if (T->value==G) {
 	      return;
 	    }
 	    for (k1=T->i+1;k1<T->j;k1++)
 	      for (k2=T->i+TURN; k2<T->j;k2++) {
-	        type2=BP_pair[S[k2]][S[k1]];
+	        type2=BP_pair[SEQ[k2]][SEQ[k1]];
 	        if (type2==0) continue;
 	        G=LoopEnergy(k1-T->i-1, T->j-k2-1, type, type2,
-		S[T->i+1], S[T->j-1], S[k1-1], S[k2+1]);
+		SEQ[T->i+1], SEQ[T->j-1], SEQ[k1-1], SEQ[k2+1]);
 	        if (T->value==G+c[indx2[k2]+k1]) {
 	          pushblock(k1,k2,0,0,10,c[indx2[k2]+k1]);
 	          return;
 	        }
 	    }
 	    for (k1=T->i+1;k1<T->j-1;k1++) {
-	      G=P->MLintern[type]+P->MLclosing;
+	      G=PARS->MLintern[type]+PARS->MLclosing;
 	      if (T->value==fML1[indx2[k1]+T->i+1]+fML[indx2[T->j-1]+k1+1]+G) {
 	        pushblock(T->i+1,k1,0,0,15,fML1[indx2[k1]+T->i+1]);
 	        pushblock(k1+1,T->j-1,0,0,12,fML[indx2[T->j-1]+k1+1]);
@@ -1010,7 +1010,7 @@ void de_I(block *T, const char *seq)
 	      pushblock(k1+1,T->j,0,0,12,fML[indx2[T->j]+k1+1]);
 	      return;
 	    }
-	    if (T->value==fML1[indx2[k1]+T->i]+(T->j-k1)*P->MLbase) {
+	    if (T->value==fML1[indx2[k1]+T->i]+(T->j-k1)*PARS->MLbase) {
 	      pushblock(T->i,k1,0,0,15,fML1[indx2[k1]+T->i]);
 	      return;
 	    }
@@ -1035,8 +1035,8 @@ void de_I(block *T, const char *seq)
 	  break;
 	case 14: //decompose f51
 	  for (k1=T->i;k1<T->j;k1++) {
-	    type = BP_pair[S[k1]][S[T->j]];
-	    if (type>2) G=P->TerminalAU; else G=0;
+	    type = BP_pair[SEQ[k1]][SEQ[T->j]];
+	    if (type>2) G=PARS->TerminalAU; else G=0;
 	    if (type && T->value==c[indx2[T->j]+k1]+G) {
 	      pushblock(k1,T->j,0,0,10,c[indx2[T->j]+k1]);
 	      return;
@@ -1045,9 +1045,9 @@ void de_I(block *T, const char *seq)
 	  break;
 	case 15: //decompose fML1
 	  for (k1=T->i;k1<T->j;k1++) {
-	    type = BP_pair[S[k1]][S[T->j]];
+	    type = BP_pair[SEQ[k1]][SEQ[T->j]];
 	    if (type) {
-	      G=P->MLintern[type]+(k1-T->i)*P->MLbase;
+	      G=PARS->MLintern[type]+(k1-T->i)*PARS->MLbase;
 	      if (T->value==c[indx2[T->j]+k1]+G) {
 	        pushblock(k1,T->j,0,0,10,c[indx2[T->j]+k1]);
 	        return;
@@ -1057,7 +1057,7 @@ void de_I(block *T, const char *seq)
 	  break;
 	case 16: //decompose fPL1
 	  for (k1=T->i;k1<T->j;k1++) {
-	    type = BP_pair[S[k1]][S[T->j]];
+	    type = BP_pair[SEQ[k1]][SEQ[T->j]];
 	    if (type) {
 	      G=BETA2+(k1-T->i)*BETA3;
 	      if (T->value==c[indx2[T->j]+k1]+G) {
@@ -1068,14 +1068,14 @@ void de_I(block *T, const char *seq)
 	  }
 	  break;
 	case 20: //decompose gtight
-	  type=BP_pair[S[T->i]][S[T->j]];
-	  type2=BP_pair[S[T->s]][S[T->r]];
+	  type=BP_pair[SEQ[T->i]][SEQ[T->j]];
+	  type2=BP_pair[SEQ[T->s]][SEQ[T->r]];
 	  if (type==0 || type2==0) return;
 	  ptable[T->i]=T->j;
 	  ptable[T->j]=T->i;
 	  if (type2 && T->s-T->r>TURN) {
 	    G=(int)(SIGMA*LoopEnergy(T->r-T->i-1,T->j-T->s-1,type,type2,
-		  S[T->i+1],S[T->j-1],S[T->r-1],S[T->s+1]));
+		  SEQ[T->i+1],SEQ[T->j-1],SEQ[T->r-1],SEQ[T->s+1]));
 	    if (T->value==G) {
 	      ptable[T->r]=T->s;
 	      ptable[T->s]=T->r;
@@ -1083,23 +1083,23 @@ void de_I(block *T, const char *seq)
 	    }
 	    for (k1=T->i+1;k1<T->r;k1++)
 	      for (k2=T->s+1;k2<T->j;k2++) {
-	        typek=BP_pair[S[k2]][S[k1]];
+	        typek=BP_pair[SEQ[k2]][SEQ[k1]];
 	        if (typek) {
 	          G=(int)(SIGMA*LoopEnergy(k1-T->i-1,T->j-k2-1,type,typek,
-		S[T->i+1],S[T->j-1],S[k1-1],S[k2+1]));
+		SEQ[T->i+1],SEQ[T->j-1],SEQ[k1-1],SEQ[k2+1]));
 	          V=Gtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][T->s]+indx4[3][k2]];
 	          if (T->value==G+V) {
 	            pushblock(k1,k2,T->r,T->s,20,V);
 	            return;
 	          }
-	          G=P->MLclosing+P->MLintern[type];
+	          G=PARS->MLclosing+PARS->MLintern[type];
 	          if (k1-T->i>1) {
 	            if (T->value==G+V+IML[indx2[k1-1]+T->i+1]) {
 	               pushblock(k1,k2,T->r,T->s,20,V);
 	               pushblock(T->i+1,k1-1,0,0,2,IML[indx2[k1-1]+T->i+1]);
 	             return;
 	            }
-	            if (T->value==G+V+(T->j-k2-1)*P->MLbase) {
+	            if (T->value==G+V+(T->j-k2-1)*PARS->MLbase) {
 	              pushblock(k1,k2,T->r,T->s,20,V);
 	              return;
 	            }
@@ -1110,7 +1110,7 @@ void de_I(block *T, const char *seq)
 	              pushblock(k2+1,T->j-1,0,0,2,IML[indx2[T->j-1]+k2+1]);
 	              return;
 	            }
-	            if (T->value==G+V+(k1-T->i-1)*P->MLbase) {
+	            if (T->value==G+V+(k1-T->i-1)*PARS->MLbase) {
 	              pushblock(k1,k2,T->r,T->s,20,V);
 	              return;
 	            }
@@ -1130,8 +1130,8 @@ void de_I(block *T, const char *seq)
 	case 21: //decompose Gu
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
-	      if (BP_pair[S[k1]][S[T->j]]>2) G=P->TerminalAU; else G=0;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]>2) G=PARS->TerminalAU; else G=0;
 	      if (k1-T->i>0) left=I5[indx2[k1-1]+T->i]; else left=0;
 	      if (k2-T->s>0) {
 	        right=IPL[indx2[k2-1]+T->s]; 
@@ -1151,8 +1151,8 @@ void de_I(block *T, const char *seq)
 	case 22: //decompose Guep
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
-	      if (BP_pair[S[k1]][S[T->j]]>2) G=P->TerminalAU; else G=0;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]>2) G=PARS->TerminalAU; else G=0;
 	      if (k1-T->i>0) {
 	        left=IPL[indx2[k1-1]+T->i]; flag1=1;
 	        if ((k1-T->i)*BETA3 < left) {left=(k1-T->i)*BETA3;flag1=0;}
@@ -1175,10 +1175,10 @@ void de_I(block *T, const char *seq)
 	case 23: //decompose Gumm
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
 	      if (k1-T->i>0) {
 	        left=IML[indx2[k1-1]+T->i]; flag1=1;
-	        if ((k1-T->i)*P->MLbase < left) {left=(k1-T->i)*P->MLbase;flag1=0;}
+	        if ((k1-T->i)*PARS->MLbase < left) {left=(k1-T->i)*PARS->MLbase;flag1=0;}
 	      } else 
 	        left=0;
 	      if (k2-T->s>0) {
@@ -1186,8 +1186,8 @@ void de_I(block *T, const char *seq)
 	        if ((k2-T->s)*BETA3 < right) {right=(k2-T->s)*BETA3;flag2=0;}
 	      } else 
 	        right=0;
-	      typek=BP_pair[S[k1]][S[T->j]];
-	      G=P->MLintern[typek];
+	      typek=BP_pair[SEQ[k1]][SEQ[T->j]];
+	      G=PARS->MLintern[typek];
 	      V=Gtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][k2]+indx4[3][T->j]];
 	      if (T->value==left+right+V+G) {
 	        pushblock(k1,T->j,T->r,k2,20,V);
@@ -1200,7 +1200,7 @@ void de_I(block *T, const char *seq)
 	case 24: //decompose Gump
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
 	      if (k1-T->i>0) {
 	        left=IPL[indx2[k1-1]+T->i]; flag1=1;
 	        if ((k1-T->i)*BETA3 < left) {left=(k1-T->i)*BETA3;flag1=0;}
@@ -1211,8 +1211,8 @@ void de_I(block *T, const char *seq)
 	        if ((k2-T->s)*BETA3 < right) {right=(k2-T->s)*BETA3;flag2=0;}
 	      } else 
 	        right=0;
-	      typek=BP_pair[S[k1]][S[T->j]];
-	      G=P->MLintern[typek];
+	      typek=BP_pair[SEQ[k1]][SEQ[T->j]];
+	      G=PARS->MLintern[typek];
 	      V=Gtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][k2]+indx4[3][T->j]];
 	      if (T->value==left+right+V+G) {
 	        pushblock(k1,T->j,T->r,k2,20,V);
@@ -1225,7 +1225,7 @@ void de_I(block *T, const char *seq)
 	case 25: //decompose Gup
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
 	      if (k1-T->i>0) {
 	        left=IPL[indx2[k1-1]+T->i]; flag1=1;
 	        if ((k1-T->i)*BETA3 < left) {left=(k1-T->i)*BETA3;flag1=0;}
@@ -1393,7 +1393,8 @@ void symbFold(char *seq)
 
 	initial(length);
 	update_fold_params();
-	P = scale_parameters();
+	if (PARS) free(PARS);
+	PARS = scale_parameters();
 	encode_seq(seq);
 	fillarray(seq);
 
@@ -1401,6 +1402,7 @@ void symbFold(char *seq)
 	while (Bstack!=NULL) {
 	  T=popblock();
 	  de_I(T,seq);
+		free(T);
 // 	  printf("-----------------------------------\n");
 // 	  IN=Bstack;
 // 	  while (IN!=NULL) {

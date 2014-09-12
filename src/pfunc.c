@@ -118,23 +118,23 @@ void partition(char *seq)
 // 	    j=i+gap;
 
 // printf("%d %d\n", i,j);
-	    type = BP_pair[S[i]][S[j]];
+	    type = BP_pair[SEQ[i]][SEQ[j]];
 	    if (type) {
-	      G=HairpinE(j-i-1, type, S[i+1], S[j-1], seq+i-1);
+	      G=HairpinE(j-i-1, type, SEQ[i+1], SEQ[j-1], seq+i-1);
 	      Qc[indx2[j]+i]=EXP(G);
 	      for (p = i+1; p <= j-2-TURN; p++) 
 	        for (q = p+TURN; q < j; q++) {
-	          type2 = BP_pair[S[p]][S[q]];
+	          type2 = BP_pair[SEQ[p]][SEQ[q]];
 
 	          if (type2==0) continue;
 	          type2 = rtype[type2];
 
 	          G = LoopEnergy(p-i-1, j-q-1, type, type2,
-				S[i+1], S[j-1], S[p-1], S[q+1]);
+				SEQ[i+1], SEQ[j-1], SEQ[p-1], SEQ[q+1]);
 	          Qc[indx2[j]+i]+=EXP(G)*Qc[indx2[q]+p];
 	      }
 	      for (k1=i+1;k1<j-1;k1++) {
-	        G=P->MLintern[type]+P->MLclosing;
+	        G=PARS->MLintern[type]+PARS->MLclosing;
 	        Qc[indx2[j]+i]+=QfML1[indx2[k1]+i+1]*QfML[indx2[j-1]+k1+1]*EXP(G);
 	      }
 	    } else 
@@ -142,8 +142,8 @@ void partition(char *seq)
 
 	    Qf51[indx2[j]+i]=0;
 	    for (k1=i;k1<j;k1++) {
-	      type = BP_pair[S[k1]][S[j]];
-	      if (type>2) G=P->TerminalAU; else G=0;
+	      type = BP_pair[SEQ[k1]][SEQ[j]];
+	      if (type>2) G=PARS->TerminalAU; else G=0;
 	      if (type) Qf51[indx2[j]+i]+=Qc[indx2[j]+k1]*EXP(G);
 
 	    }
@@ -155,22 +155,22 @@ void partition(char *seq)
 
 	    QfML1[indx2[j]+i]=0;
 	    for (k1=i;k1<j;k1++) {
-	      type=BP_pair[S[k1]][S[j]];
+	      type=BP_pair[SEQ[k1]][SEQ[j]];
 	      if (type) {
-	        G=P->MLintern[type]+(k1-i)*P->MLbase;
+	        G=PARS->MLintern[type]+(k1-i)*PARS->MLbase;
 	        QfML1[indx2[j]+i]+=Qc[indx2[j]+k1]*EXP(G);
 	      }
 	    }
 
 	    QfML[indx2[j]+i]=QfML1[indx2[j]+i];
 	    for (k1=i;k1<j;k1++) {
-	      G=(j-k1)*P->MLbase;
+	      G=(j-k1)*PARS->MLbase;
 	      QfML[indx2[j]+i]+=QfML1[indx2[k1]+i]*(QfML[indx2[j]+k1+1]+EXP(G));
 	    }
 
 	    QfPL1[indx2[j]+i]=0;
 	    for (k1=i;k1<j;k1++) {
-	      type=BP_pair[S[k1]][S[j]];
+	      type=BP_pair[SEQ[k1]][SEQ[j]];
 	      if (type) {
 	        G=BETA2+(k1-i)*BETA3;
 	        QfPL1[indx2[j]+i]+=Qc[indx2[j]+k1]*EXP(G);
@@ -184,35 +184,35 @@ void partition(char *seq)
 	    }
 // partition for secondary structure S done!
 
- 	    type1=BP_pair[S[i]][S[j]];
+ 	    type1=BP_pair[SEQ[i]][SEQ[j]];
 	    for (r=i+1;r<j-1;r++)
 	      for (s=j-1;s>r;s--) {
-	        type2=BP_pair[S[s]][S[r]];
+	        type2=BP_pair[SEQ[s]][SEQ[r]];
 	        index=indx4[0][i]+indx4[1][r]+indx4[2][s]+indx4[3][j];
 	        if (type1 && type2 && s-r>TURN) { // start Gtight
 	          G=(int)(SIGMA*LoopEnergy(r-i-1,j-s-1,type1,type2,
-		  S[i+1],S[j-1],S[r-1],S[s+1]));
+		  SEQ[i+1],SEQ[j-1],SEQ[r-1],SEQ[s+1]));
 	          QGtight[index]=EXP(G);
 // G is empty, it is big interior loop
 	          for (k1=i+1;k1<r;k1++)
 	            for (k2=s+1;k2<j;k2++) {
-	              typek=BP_pair[S[k2]][S[k1]];
+	              typek=BP_pair[SEQ[k2]][SEQ[k1]];
 	              indexk=indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][k2];
 
 	              if (typek) {
 	                G=(int)(SIGMA*LoopEnergy(k1-i-1,j-k2-1,type1,typek,
-		S[i+1],S[j-1],S[k1-1],S[k2+1]));
+		SEQ[i+1],SEQ[j-1],SEQ[k1-1],SEQ[k2+1]));
 	                QGtight[index]+=QGtight[indexk]*EXP(G);
 // G is an interior loop plus another G
 
-	                G=P->MLclosing+P->MLintern[type1];
+	                G=PARS->MLclosing+PARS->MLintern[type1];
 	                if (k1-i>1)
 	                  QGtight[index]+=QGtight[indexk]*EXP(G)*QIML[indx2[k1-1]+i+1]
-		*EXP(((j-k2-1)*P->MLbase));
+		*EXP(((j-k2-1)*PARS->MLbase));
 // G is a miltiloop, and the rhs. is empty
 
 	                if (j-k2>1) 
-	                  QGtight[index]+=QGtight[indexk]*EXP(G)*EXP(((k1-i-1)*P->MLbase))
+	                  QGtight[index]+=QGtight[indexk]*EXP(G)*EXP(((k1-i-1)*PARS->MLbase))
 		*QIML[indx2[j-1]+k2+1];
 // G is a miltiloop, and the lhs. is empty
 
@@ -226,10 +226,10 @@ void partition(char *seq)
 	          QGtight[index]=0;
 //calculate the G matrix
 	        QGh[index]=0;
-	        type1=BP_pair[S[i]][S[j]];
+	        type1=BP_pair[SEQ[i]][SEQ[j]];
 	        if (type1) {
 	          for (k2=s>r+TURN?s:r+TURN; k2<j; k2++) {
-	            type2=BP_pair[S[r]][S[k2]];
+	            type2=BP_pair[SEQ[r]][SEQ[k2]];
 	            if (type2==0) continue;
 	            if (k2-s>0)
 	              right=QIPL[indx2[k2-1]+s]+EXP((k2-s)*BETA3);
@@ -242,9 +242,9 @@ void partition(char *seq)
 
 	        QGu[index]=0;
 	        for (k1=i;k1<r;k1++) {
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
-	          typek=BP_pair[S[k1]][S[j]];
-	          if (typek>2) G=P->TerminalAU; else G=0;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
+	          typek=BP_pair[SEQ[k1]][SEQ[j]];
+	          if (typek>2) G=PARS->TerminalAU; else G=0;
 	          if (k1-i>0) left=QI5[indx2[k1-1]+i]; else left=1;
 	          QGu[index]+=left*QGh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]*EXP(G); 
 	        }
@@ -252,9 +252,9 @@ void partition(char *seq)
 
 	        QGuep[index]=0;
 	        for (k1=i;k1<r;k1++) {
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
-	          typek=BP_pair[S[k1]][S[j]];
-	          if (typek>2) G=P->TerminalAU; else G=0;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
+	          typek=BP_pair[SEQ[k1]][SEQ[j]];
+	          if (typek>2) G=PARS->TerminalAU; else G=0;
 	          if (k1-i>0) 
 	            left=QIPL[indx2[k1-1]+i]+EXP((k1-i)*BETA3);
 	          else
@@ -265,38 +265,38 @@ void partition(char *seq)
 
 	        QGumm[index]=0;
 	        for (k1=i;k1<r;k1++) { 
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
 	          if (k1-i>0) {
-	            left=QIML[indx2[k1-1]+i]+EXP((k1-i)*P->MLbase);
+	            left=QIML[indx2[k1-1]+i]+EXP((k1-i)*PARS->MLbase);
 	          } else 
 	            left=1;
-	          typek=BP_pair[S[k1]][S[j]];
-	          G=P->MLintern[typek];
+	          typek=BP_pair[SEQ[k1]][SEQ[j]];
+	          G=PARS->MLintern[typek];
 	          QGumm[index]+=left*QGh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]*EXP(G);
 	        }
 //calculate the Gumm matrix
 
 	        QGump[index]=0;
 	        for (k1=i;k1<r;k1++) {
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
 	          if (k1-i>0) {
 	            left=QIPL[indx2[k1-1]+i]+EXP((k1-i)*BETA3);
 	          } else 
 	            left=1;
-	          typek=BP_pair[S[k1]][S[j]];
-	          G=P->MLintern[typek];
+	          typek=BP_pair[SEQ[k1]][SEQ[j]];
+	          G=PARS->MLintern[typek];
 	          QGump[index]+=left*QGh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]*EXP(G);
 	        }
 //calculate the Gump matrix
 
 	        QGup[index]=0;
 	        for (k1=i;k1<r;k1++) {
-	          if (BP_pair[S[k1]][S[j]]==0) continue;
+	          if (BP_pair[SEQ[k1]][SEQ[j]]==0) continue;
 	          if (k1-i>0) {
 	            left=QIPL[indx2[k1-1]+i]+EXP((k1-i)*BETA3);
 	          } else 
 	            left=1;
-	          typek=BP_pair[S[k1]][S[j]];
+	          typek=BP_pair[SEQ[k1]][SEQ[j]];
 	          G=BETA2; //The penalty for the maximum arc in pseudoknot
  	          QGup[index]+=left*QGh[indx4[0][k1]+indx4[1][r]+indx4[2][s]+indx4[3][j]]*EXP(G);
 	        }
@@ -407,25 +407,25 @@ void partition(char *seq)
 // 4-dimensin matrix done!
 
 	    QIbc[indx2[j]+i]=0;
-	    type = BP_pair[S[i]][S[j]];
+	    type = BP_pair[SEQ[i]][SEQ[j]];
 	    if (type) {
 	      for (k1=i+1;k1<j;k1++)
 	        for (k2=k1+TURN;k2<j;k2++) {
-	          type2=BP_pair[S[k2]][S[k1]];
+	          type2=BP_pair[SEQ[k2]][SEQ[k1]];
 	          if (type2) {
 	            G=LoopEnergy(k1-i-1,j-k2-1,type,type2,
-		S[i+1],S[j-1],S[k1-1],S[k2+1]);
+		SEQ[i+1],SEQ[j-1],SEQ[k1-1],SEQ[k2+1]);
 	            QIbc[indx2[j]+i]+=EXP(G)*QIbc[indx2[k2]+k1];
 
-	            G=P->MLclosing+P->MLintern[type]+P->MLintern[type2];
+	            G=PARS->MLclosing+PARS->MLintern[type]+PARS->MLintern[type2];
 	            if (k1-i>1) {
 	              left=QIML[indx2[k1-1]+i+1];
-	              right=EXP((j-k2-1)*P->MLbase);
+	              right=EXP((j-k2-1)*PARS->MLbase);
 	              QIbc[indx2[j]+i]+=left*right*EXP(G)*QIbc[indx2[k2]+k1];
 	            }
 
 	            if (j-k2>1) {
-	              left=EXP((k1-i-1)*P->MLbase);
+	              left=EXP((k1-i-1)*PARS->MLbase);
 	              right=QfML[indx2[j-1]+k2+1]; 
 	              QIbc[indx2[j]+i]+=left*right*EXP(G)*QIbc[indx2[k2]+k1];
 	            }
@@ -437,11 +437,11 @@ void partition(char *seq)
 	            }
 	          }
 	      }
-	      G=P->MLclosing+P->MLintern[type];
+	      G=PARS->MLclosing+PARS->MLintern[type];
 	      for (k1=i+TURN;k1<=j-1;k1++) {
 	        left=QIML1[indx2[k1]+i+1];
 	        if (k1<j-1) {
-	          right=QfML[indx2[j-1]+k1+1]+EXP((j-1-k1)*P->MLbase);
+	          right=QfML[indx2[j-1]+k1+1]+EXP((j-1-k1)*PARS->MLbase);
 	        } else 
 	          right=1;
  	        QIbc[indx2[j]+i]+=EXP(G)*left*right; 
@@ -478,8 +478,8 @@ void partition(char *seq)
 	    }
 	    for (r=i;r<j;r++)
 	      for (s=r+TURN;s<=j;s++) {
-	        type2 = BP_pair[S[r]][S[s]];
-	        if (type2>2) G=P->TerminalAU; else G=0;
+	        type2 = BP_pair[SEQ[r]][SEQ[s]];
+	        if (type2>2) G=PARS->TerminalAU; else G=0;
 	        if (type2) {
 	          if (r-i>0) left=QI5[indx2[r-1]+i]; else left=1;
 	          if (j-s>0) right=Qf5[indx2[j]+s+1]; else right=1;
@@ -512,16 +512,16 @@ void partition(char *seq)
 
 	    QIML[indx2[j]+i]=QfML[indx2[j]+i]+QIML1[indx2[j]+i];
 	    for (r=i+1;r<j;r++) {
-	      right=QfML[indx2[j]+r+1]+EXP((j-r)*P->MLbase);
+	      right=QfML[indx2[j]+r+1]+EXP((j-r)*PARS->MLbase);
 	      QIML[indx2[j]+i]+=QIML1[indx2[r]+i]*right;
 	    }
 	    for (r=i;r<j;r++)
 	      for (s=r+TURN;s<=j;s++) {
-	        type2=BP_pair[S[r]][S[s]];
+	        type2=BP_pair[SEQ[r]][SEQ[s]];
 	        if (type2==0) continue;
-	        G=P->MLintern[type];
-	        if (r>i) left=QIML[indx2[r-1]+i]+EXP((r-i)*P->MLbase); else left=1;
-	        if (s<j) right=QfML[indx2[j]+s+1]+EXP((j-s)*P->MLbase); else right=1;
+	        G=PARS->MLintern[type];
+	        if (r>i) left=QIML[indx2[r-1]+i]+EXP((r-i)*PARS->MLbase); else left=1;
+	        if (s<j) right=QfML[indx2[j]+s+1]+EXP((j-s)*PARS->MLbase); else right=1;
 	        QIML[indx2[j]+i]+=EXP(G)*left*right*QIbc[indx2[s]+r]*EXP(G);
 	    }
 // calculate IML
@@ -555,7 +555,7 @@ void partition(char *seq)
 	    }
 	    for (r=i;r<j;r++)
 	      for (s=r+TURN;s<=j;s++) {
-	        type2=BP_pair[S[r]][S[s]];
+	        type2=BP_pair[SEQ[r]][SEQ[s]];
 	        if (type2==0) continue;
 	        G=BETA2;
 	        if (r>i) left=QIPL[indx2[r-1]+i]+EXP((r-i)*BETA3); else left=1;
@@ -571,7 +571,8 @@ void pfunc(char *seq)
 	int length;
 	length=strlen(seq);
 	update_fold_params();
-	P = scale_parameters();
+	if (PARS) free(PARS);
+	PARS = scale_parameters();
 	encode_seq(seq);
 
 	pfunc_initial(length);
@@ -599,7 +600,7 @@ void deblock(block *T, char *seq)
 	  if (Qpro==0) return;
 	  Qi=0;
 
-	  type = BP_pair[S[T->i]][S[T->j]];
+	  type = BP_pair[SEQ[T->i]][SEQ[T->j]];
 	  if (!type) {
 	    fprintf(fo, "Error block Ibc! Please check!\n");
 	    exit(0);
@@ -610,10 +611,10 @@ void deblock(block *T, char *seq)
 	
 	  for (k1=T->i+1;k1<T->j;k1++)
 	    for (k2=k1+TURN;k2<T->j;k2++) {
-	      type2=BP_pair[S[k2]][S[k1]];
+	      type2=BP_pair[SEQ[k2]][SEQ[k1]];
 	      if (type2) {
 	        G=LoopEnergy(k1-T->i-1,T->j-k2-1,type,type2,
-		S[T->i+1],S[T->j-1],S[k1-1],S[k2+1]);
+		SEQ[T->i+1],SEQ[T->j-1],SEQ[k1-1],SEQ[k2+1]);
 	        Qi+=EXP(G)*QIbc[indx2[k2]+k1];
 	        if (Qi>=Qpro) {
 	          pushblock(k1,k2,0,0,0,0);
@@ -621,27 +622,27 @@ void deblock(block *T, char *seq)
 	          return;
 	        }
 
-	        G=P->MLclosing+P->MLintern[type]+P->MLintern[type2];
+	        G=PARS->MLclosing+PARS->MLintern[type]+PARS->MLintern[type2];
 	        if (k1-T->i>1) {
 	          left=QIML[indx2[k1-1]+T->i+1];
-	          right=EXP((T->j-k2-1)*P->MLbase);
+	          right=EXP((T->j-k2-1)*PARS->MLbase);
 	          Qi+=left*right*EXP(G)*QIbc[indx2[k2]+k1];
 	          if (Qi>=Qpro) {
 	            pushblock(k1,k2,0,0,0,0);
 	            pushblock(T->i+1,k1-1,0,0,2,0);
-	            score+=G+(T->j-k2-1)*P->MLbase;
+	            score+=G+(T->j-k2-1)*PARS->MLbase;
 	            return;
 	          }
 	        }
 
 	        if (T->j-k2>1) {
-	          left=EXP((k1-T->i-1)*P->MLbase);
+	          left=EXP((k1-T->i-1)*PARS->MLbase);
 	          right=QfML[indx2[T->j-1]+k2+1]; 
 	          Qi+=left*right*EXP(G)*QIbc[indx2[k2]+k1];
 	          if (Qi>=Qpro) {
 	            pushblock(k1,k2,0,0,0,0);
 	            pushblock(k2+1,T->j-1,0,0,12,0);
-	            score+=G+(k1-T->i-1)*P->MLbase;
+	            score+=G+(k1-T->i-1)*PARS->MLbase;
 	            return;
 	          }
 	        }
@@ -660,7 +661,7 @@ void deblock(block *T, char *seq)
 	        }
 	      }
 	  }
-	  G=P->MLclosing+P->MLintern[type];
+	  G=PARS->MLclosing+PARS->MLintern[type];
 	  for (k1=T->i+TURN;k1<=T->j-1;k1++) {
 	    left=QIML1[indx2[k1]+T->i+1];
 	    if (k1<T->j-1) {
@@ -673,11 +674,11 @@ void deblock(block *T, char *seq)
 	        return;
 	      }
 
-	      right=EXP((T->j-1-k1)*P->MLbase);
+	      right=EXP((T->j-1-k1)*PARS->MLbase);
 	      Qi+=EXP(G)*left*right;
 	      if (Qi>=Qpro) {
 	        pushblock(T->i+1,k1,0,0,5,0);
-	        score+=G+(T->j-1-k1)*P->MLbase;
+	        score+=G+(T->j-1-k1)*PARS->MLbase;
 	        return;
 	      }
 	    } else {
@@ -716,8 +717,8 @@ void deblock(block *T, char *seq)
 	  }
 	  for (k1=T->i;k1<T->j;k1++)
 	    for (k2=k1+TURN;k2<=T->j;k2++) {
-	      type2 = BP_pair[S[k1]][S[k2]];
-	      if (type2>2) G=P->TerminalAU; else G=0;
+	      type2 = BP_pair[SEQ[k1]][SEQ[k2]];
+	      if (type2>2) G=PARS->TerminalAU; else G=0;
 	      if (type2) {
 	        if (k1-T->i>0) left=QI5[indx2[k1-1]+T->i]; else left=1;
 	        if (T->j-k2>0) right=Qf5[indx2[T->j]+k2+1]; else right=1;
@@ -754,18 +755,18 @@ void deblock(block *T, char *seq)
 	      pushblock(k1+1,T->j,0,0,12,0);
 	      return;
 	    }
-	    Qi+=QIML1[indx2[k1]+T->i]*EXP((T->j-k1)*P->MLbase);
+	    Qi+=QIML1[indx2[k1]+T->i]*EXP((T->j-k1)*PARS->MLbase);
 	    if (Qi>=Qpro) {
 	      pushblock(T->i,k1,0,0,5,0);
-	       score+=(T->j-k1)*P->MLbase;
+	       score+=(T->j-k1)*PARS->MLbase;
 	      return;
 	    }
 	  }
 	  for (k1=T->i;k1<T->j;k1++)
 	    for (k2=k1+TURN;k2<=T->j;k2++) {
-	      type=BP_pair[S[k1]][S[k2]];
+	      type=BP_pair[SEQ[k1]][SEQ[k2]];
 	      if (type==0) continue;
-	      G=P->MLintern[type];
+	      G=PARS->MLintern[type];
 	      if (k1>T->i) left=QIML[indx2[k1-1]+T->i]; else left=1;
 	      if (k2<T->j) right=QfML[indx2[T->j]+k2+1]; else right=1;
 	      if (k1>T->i && k2<T->j) { 
@@ -779,28 +780,28 @@ void deblock(block *T, char *seq)
 	        }
 	      }
 	      if (k1>T->i) {
-	        Qi+=EXP(G)*left*EXP((T->j-k2)*P->MLbase)*QIbc[indx2[k2]+k1];
+	        Qi+=EXP(G)*left*EXP((T->j-k2)*PARS->MLbase)*QIbc[indx2[k2]+k1];
 	        if (Qi>=Qpro) {
 	          pushblock(k1,k2,0,0,0,0);
 	          pushblock(T->i,k1-1,0,0,2,0);
-	          score+=G+(T->j-k2)*P->MLbase;
+	          score+=G+(T->j-k2)*PARS->MLbase;
 	          return;
 	        }
 	      }
 	      if (k2<T->j) {
-	        Qi+=EXP(G)*right*EXP((k1-T->i)*P->MLbase)*QIbc[indx2[k2]+k1];
+	        Qi+=EXP(G)*right*EXP((k1-T->i)*PARS->MLbase)*QIbc[indx2[k2]+k1];
 	        if (Qi>=Qpro) {
 	          pushblock(k1,k2,0,0,0,0);
 	          pushblock(k2+1,T->j,0,0,12,0);
-	          score+=G+(k1-T->i)*P->MLbase;
+	          score+=G+(k1-T->i)*PARS->MLbase;
 	          return;
 	        }
 	      }
-	      Qi+=EXP(G)*EXP((k1-T->i)*P->MLbase)*EXP((T->j-k2)*P->MLbase)
+	      Qi+=EXP(G)*EXP((k1-T->i)*PARS->MLbase)*EXP((T->j-k2)*PARS->MLbase)
 		*QIbc[indx2[k2]+k1];
 	      if (Qi>=Qpro) {
 	        pushblock(k1,k2,0,0,0,0);
-	        score+=(k1-T->i)*P->MLbase+G+(T->j-k2)*P->MLbase;
+	        score+=(k1-T->i)*PARS->MLbase+G+(T->j-k2)*PARS->MLbase;
 	        return;
 	      }
 	  }
@@ -834,7 +835,7 @@ void deblock(block *T, char *seq)
 	  }
 	  for (k1=T->i;k1<T->j;k1++)
 	    for (k2=k1+TURN;k2<=T->j;k2++) {
-	      type=BP_pair[S[k1]][S[k2]];
+	      type=BP_pair[SEQ[k1]][SEQ[k2]];
 	      if (type==0) continue;
 	      G=BETA2;
 	      if (k1>T->i) left=QIPL[indx2[k1-1]+T->i]; else left=1;
@@ -993,14 +994,14 @@ void deblock(block *T, char *seq)
 	case 10: //decompose Qc
 	  Qpro=seed*Qc[indx2[T->j]+T->i];
 	  if (Qpro==0) return;
-	  type=BP_pair[S[T->i]][S[T->j]];
+	  type=BP_pair[SEQ[T->i]][SEQ[T->j]];
 	  if (!type) {
 	    fprintf(fo, "Error block Ibc! Please check!\n");
 	    exit(0);
 	  }
 	  sample[T->i]=T->j;
 	  sample[T->j]=T->i;
-	  G=HairpinE(T->j-T->i-1, type, S[T->i+1], S[T->j-1], seq+T->i-1);
+	  G=HairpinE(T->j-T->i-1, type, SEQ[T->i+1], SEQ[T->j-1], seq+T->i-1);
 	  Qi=EXP(G);
 	  if (Qi>=Qpro) {
 	    score+=G;
@@ -1008,10 +1009,10 @@ void deblock(block *T, char *seq)
 	  }
 	  for (k1=T->i+1;k1<T->j;k1++)
 	    for (k2=k1+TURN; k2<T->j;k2++) {
-	      type2=BP_pair[S[k2]][S[k1]];
+	      type2=BP_pair[SEQ[k2]][SEQ[k1]];
 	      if (type2==0) continue;
 	      G=LoopEnergy(k1-T->i-1, T->j-k2-1, type, type2,
-		S[T->i+1], S[T->j-1], S[k1-1], S[k2+1]);
+		SEQ[T->i+1], SEQ[T->j-1], SEQ[k1-1], SEQ[k2+1]);
 	      Qi+=EXP(G)*Qc[indx2[k2]+k1];
 	      if (Qi>=Qpro) {
 	        pushblock(k1,k2,0,0,10,0);
@@ -1020,7 +1021,7 @@ void deblock(block *T, char *seq)
 	      }
 	  }
 	  for (k1=T->i+1;k1<T->j-1;k1++) {
-	    G=P->MLintern[type]+P->MLclosing;
+	    G=PARS->MLintern[type]+PARS->MLclosing;
 	    Qi+=QfML1[indx2[k1]+T->i+1]*QfML[indx2[T->j-1]+k1+1]*EXP(G);
 	    if (Qi>=Qpro) {
 	      pushblock(T->i+1,k1,0,0,15,0);
@@ -1065,10 +1066,10 @@ void deblock(block *T, char *seq)
 	      pushblock(k1+1,T->j,0,0,12,0);
 	      return;
 	    }
-	    Qi+=QfML1[indx2[k1]+T->i]*EXP((T->j-k1)*P->MLbase);
+	    Qi+=QfML1[indx2[k1]+T->i]*EXP((T->j-k1)*PARS->MLbase);
 	    if (Qi>=Qpro) {
 	      pushblock(T->i,k1,0,0,15,0);
-	      score+=(T->j-k1)*P->MLbase;
+	      score+=(T->j-k1)*PARS->MLbase;
 	      return;
 	    }
 	  }
@@ -1101,9 +1102,9 @@ void deblock(block *T, char *seq)
 	  if (Qpro==0) return;
 	  Qi=0;
 	  for (k1=T->i;k1<T->j;k1++) {
-	    type = BP_pair[S[k1]][S[T->j]];
+	    type = BP_pair[SEQ[k1]][SEQ[T->j]];
 	    if (type==0) continue;
-	    if (type>2) G=P->TerminalAU; else G=0;
+	    if (type>2) G=PARS->TerminalAU; else G=0;
 	    Qi+=Qc[indx2[T->j]+k1]*EXP(G);
 	    if (Qi>=Qpro) {
 	      pushblock(k1,T->j,0,0,10,0);
@@ -1117,9 +1118,9 @@ void deblock(block *T, char *seq)
 	  if (Qpro==0) return;
 	  Qi=0;
 	  for (k1=T->i;k1<T->j;k1++) {
-	    type = BP_pair[S[k1]][S[T->j]];
+	    type = BP_pair[SEQ[k1]][SEQ[T->j]];
 	    if (type==0) continue;
-	    G=P->MLintern[type]+(k1-T->i)*P->MLbase;
+	    G=PARS->MLintern[type]+(k1-T->i)*PARS->MLbase;
 	    Qi+=Qc[indx2[T->j]+k1]*EXP(G);
 	    if (Qi>=Qpro) {
 	      pushblock(k1,T->j,0,0,10,0);
@@ -1133,7 +1134,7 @@ void deblock(block *T, char *seq)
 	  if (Qpro==0) return;
 	  Qi=0;
 	  for (k1=T->i;k1<T->j;k1++) {
-	    type = BP_pair[S[k1]][S[T->j]];
+	    type = BP_pair[SEQ[k1]][SEQ[T->j]];
 	    if (type==0) continue;
 	    G=BETA2+(k1-T->i)*BETA3;
 	    Qi+=Qc[indx2[T->j]+k1]*EXP(G);
@@ -1147,8 +1148,8 @@ void deblock(block *T, char *seq)
 	case 20: //decompose QGtight
 	  Qpro=seed*QGtight[indx4[0][T->i]+indx4[1][T->r]+indx4[2][T->s]+indx4[3][T->j]];
 	  if (Qpro==0) return;
-	  type=BP_pair[S[T->i]][S[T->j]];
-	  type2=BP_pair[S[T->s]][S[T->r]];
+	  type=BP_pair[SEQ[T->i]][SEQ[T->j]];
+	  type2=BP_pair[SEQ[T->s]][SEQ[T->r]];
 	  if (type==0 || type2==0) {
 	    fprintf(fo, "Error block Ibc! Please check!\n");
 	    exit(0);
@@ -1156,7 +1157,7 @@ void deblock(block *T, char *seq)
 	  sample[T->i]=T->j;
 	  sample[T->j]=T->i;
 	  G=(int)(SIGMA*LoopEnergy(T->r-T->i-1,T->j-T->s-1,type,type2,
-		  S[T->i+1],S[T->j-1],S[T->r-1],S[T->s+1]));
+		  SEQ[T->i+1],SEQ[T->j-1],SEQ[T->r-1],SEQ[T->s+1]));
 	  Qi=EXP(G);
 	  if (Qi>=Qpro) {
 	    sample[T->r]=T->s;
@@ -1166,11 +1167,11 @@ void deblock(block *T, char *seq)
 	  }
 	  for (k1=T->i+1;k1<T->r;k1++)
 	    for (k2=T->s+1;k2<T->j;k2++) {
-	      typek=BP_pair[S[k2]][S[k1]];
+	      typek=BP_pair[SEQ[k2]][SEQ[k1]];
 	      indexk=indx4[0][k1]+indx4[1][T->r]+indx4[2][T->s]+indx4[3][k2];
 	      if (typek) {
 	        G=(int)(SIGMA*LoopEnergy(k1-T->i-1,T->j-k2-1,type,typek,
-		S[T->i+1],S[T->j-1],S[k1-1],S[k2+1]));
+		SEQ[T->i+1],SEQ[T->j-1],SEQ[k1-1],SEQ[k2+1]));
 
 	        Qi+=QGtight[indexk]*EXP(G);
 	        if (Qi>=Qpro) {
@@ -1178,7 +1179,7 @@ void deblock(block *T, char *seq)
 	          score+=G;
 	          return;
 	        }
-	        G=P->MLclosing+P->MLintern[type];
+	        G=PARS->MLclosing+PARS->MLintern[type];
 	        if (k1-T->i>1 ) {
 	          Qi+=QGtight[indexk]*EXP(G)*QIML[indx2[k1-1]+T->i+1];
 	          if (Qi>=Qpro) {
@@ -1216,9 +1217,9 @@ void deblock(block *T, char *seq)
 	  Qi=0;
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
-	      typek=BP_pair[S[k1]][S[T->j]];
-	      if (typek>2) G=P->TerminalAU; else G=0;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
+	      typek=BP_pair[SEQ[k1]][SEQ[T->j]];
+	      if (typek>2) G=PARS->TerminalAU; else G=0;
 	      if (k1-T->i>0) left=QI5[indx2[k1-1]+T->i]; else left=1;
 	      if (k2-T->s>0) {
 	        Qi+=QGtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][k2]+indx4[3][T->j]]
@@ -1256,9 +1257,9 @@ void deblock(block *T, char *seq)
 	  Qi=0;
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
-	      typek=BP_pair[S[k1]][S[T->j]];
-	      if (typek>2) G=P->TerminalAU; else G=0;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
+	      typek=BP_pair[SEQ[k1]][SEQ[T->j]];
+	      if (typek>2) G=PARS->TerminalAU; else G=0;
 	      if (k1-T->i>0) {
 	        Qi+=QGtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][k2]+indx4[3][T->j]]
 		*QIPL[indx2[k1-1]+T->i]*EXP((k2-T->s)*BETA3)*EXP(G);
@@ -1304,9 +1305,9 @@ void deblock(block *T, char *seq)
 	  Qi=0;
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
-	      typek=BP_pair[S[k1]][S[T->j]];
-	      G=P->MLintern[typek];
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
+	      typek=BP_pair[SEQ[k1]][SEQ[T->j]];
+	      G=PARS->MLintern[typek];
 	      if (k1-T->i>0) {
 	        Qi+=QGtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][k2]+indx4[3][T->j]]
 		*QIML[indx2[k1-1]+T->i]*EXP((k2-T->s)*BETA3)*EXP(G);
@@ -1319,11 +1320,11 @@ void deblock(block *T, char *seq)
 	      }
 	      if (k2-T->s>0) {
 	        Qi+=QGtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][k2]+indx4[3][T->j]]
-		*EXP((k1-T->i)*P->MLbase)*QIPL[indx2[k2-1]+T->s]*EXP(G);
+		*EXP((k1-T->i)*PARS->MLbase)*QIPL[indx2[k2-1]+T->s]*EXP(G);
 	        if (Qi>=Qpro) {
 	          pushblock(k1,T->j,T->r,k2,20,0);
 	          pushblock(T->s,k2-1,0,0,3,0);
-	          score+=G+(k1-T->i)*P->MLbase;
+	          score+=G+(k1-T->i)*PARS->MLbase;
 	          return;
 	        }
 	      }
@@ -1339,10 +1340,10 @@ void deblock(block *T, char *seq)
 	        }
 	      }
 	      Qi+=QGtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][k2]+indx4[3][T->j]]
-		*EXP((k1-T->i)*P->MLbase)*EXP((k2-T->s)*BETA3)*EXP(G);
+		*EXP((k1-T->i)*PARS->MLbase)*EXP((k2-T->s)*BETA3)*EXP(G);
 	      if (Qi>=Qpro) {
 	        pushblock(k1,T->j,T->r,k2,20,0);
-	        score+=G+(k1-T->i)*P->MLbase+(k2-T->s)*BETA3;
+	        score+=G+(k1-T->i)*PARS->MLbase+(k2-T->s)*BETA3;
 	        return;
 	      }
 	  }
@@ -1353,9 +1354,9 @@ void deblock(block *T, char *seq)
 	  Qi=0;
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
-	      typek=BP_pair[S[k1]][S[T->j]];
-	      G=P->MLintern[typek];
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
+	      typek=BP_pair[SEQ[k1]][SEQ[T->j]];
+	      G=PARS->MLintern[typek];
 	      if (k1-T->i>0) {
 	        Qi+=QGtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][k2]+indx4[3][T->j]]
 		*QIPL[indx2[k1-1]+T->i]*EXP((k2-T->s)*BETA3)*EXP(G);
@@ -1402,8 +1403,8 @@ void deblock(block *T, char *seq)
 	  Qi=0;
 	  for (k1=T->i;k1<T->r;k1++)
 	    for (k2=T->s>T->r+TURN?T->s:T->r+TURN; k2<T->j; k2++) {
-	      if (BP_pair[S[k1]][S[T->j]]==0 || BP_pair[S[T->r]][S[k2]]==0) continue;
-	      typek=BP_pair[S[k1]][S[T->j]];;
+	      if (BP_pair[SEQ[k1]][SEQ[T->j]]==0 || BP_pair[SEQ[T->r]][SEQ[k2]]==0) continue;
+	      typek=BP_pair[SEQ[k1]][SEQ[T->j]];;
 	      G=BETA2;
 	      if (k1-T->i>0) {
 	        Qi+=QGtight[indx4[0][k1]+indx4[1][T->r]+indx4[2][k2]+indx4[3][T->j]]
@@ -1642,7 +1643,6 @@ int exist(char *s)
 	while (index!=NULL) {
 	  if (strcmp(s,index->structure)==0) {
 	    index->cnt++;
-	    free(s);
 	    return 1;
 	  }
 	  index=index->Next;
@@ -1663,7 +1663,8 @@ char *samplestructure (char *seq, int samples)
 
 	pfunc_initial(length);
 	update_fold_params();
-	P = scale_parameters();
+	if (PARS) free(PARS);
+	PARS = scale_parameters();
 	encode_seq(seq);
 
 	for (i=0;i<10;i++)
@@ -1720,7 +1721,9 @@ char *samplestructure (char *seq, int samples)
 	    index->cnt=1;
 	    index->Next=stat;
 	    stat=index;
-	  }
+	  } else {
+			free(struc);
+		}
 	}
 	for (i=0;i<4;i++) {
 	  fprintf(fo, "Genus %d [A]: %d\n",i, distribute[0][i]);

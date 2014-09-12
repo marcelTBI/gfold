@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include<time.h>
+#include <time.h>
 #include "head.h"
+
+#include "gfold_cmdline.h"
+
+#include "read_epars.h"
 
 block *initialblock(void)
 {
@@ -61,17 +65,18 @@ void encode_seq(const char *seq) {
   unsigned int i,l;
 
   l = strlen(seq);
-  S = (int *) space(sizeof(int)*(l+2));
+	if (SEQ) free(SEQ);
+  SEQ = (int *) space(sizeof(int)*(l+2));
 //  S1= (short *) space(sizeof(short)*(l+2));
   /* S1 exists only for the special X K and I bases and energy_set!=0 */
-  S[0] = l;
+  SEQ[0] = l;
 
   for (i=1; i<=l; i++) { /* make numerical encoding of sequence */
-    S[i]= (short) encode_char(toupper(seq[i-1]));
+    SEQ[i]= (short) encode_char(toupper(seq[i-1]));
   }
-    //S1[i] = alias[S[i]];   /* for mismatches of nostandard bases */
+    //S1[i] = alias[SEQ[i]];   /* for mismatches of nostandard bases */
   /* for circular folding add first base at position n+1 */
-  //S[l+1] = S[1]; S1[l+1]=S1[1];
+  //SEQ[l+1] = SEQ[1]; S1[l+1]=S1[1];
 }
 
 char *pair2structure(int *pair)
@@ -116,15 +121,16 @@ char *pair2structure(int *pair)
 	      mov3++;
 	    }
 	  } else if (pair[i]!=0 && pair[i]<i) {
-	    if (i==stack1[mov1-1]) {
+			//fprintf(stderr, "mov1=%d\n", mov1);
+	    if (mov1>0 && i==stack1[mov1-1]) {
 	      res[i-1]=')';
 	      res[pair[i]-1]='(';
 	      mov1--;
-	    } else if (i==stack2[mov2-1]) {
+	    } else if (mov2>0 && i==stack2[mov2-1]) {
 	      res[i-1]=']';
 	      res[pair[i]-1]='[';
 	      mov2--;
-	    } else if (i==stack3[mov3-1]) {
+	    } else if (mov3>0 && i==stack3[mov3-1]) {
 	      res[i-1]='}';
 	      res[pair[i]-1]='{';
 	      mov3--;
@@ -182,109 +188,98 @@ int *structure2pair(char *s)
 	free(stack3);
 	return res;
 }
-void usage(int stop)
-{
-  fprintf(stderr,  "usage:\n"
-	   "symbFold [-I input.in] [-O output.out] [-n num_of_samples] [-t temperature] [-b betaScale]\n"
-	   "If there is no [-O] option, the result will be default in output.out, samples are generated in standard output\n"
-	   "If there is no input file, input is read from standard input.\n" );
-}
 
+struct smth2 {
+  int h;
+};
 
 int main(int argc, char **argv)
 {
-clock_t start,end;
-start=clock();
-        srand48(time(NULL));
+  clock_t start,end;
+  start=clock();
+  srand48(time(NULL));
 	char seq[300], name[100], natural[300], *input, *output;
 	int i,n;
-	int samples = 100;
 	betaScale = 1.0;
-	FILE *fp;
-	input="input.in";
-	int std_input = 1;
-	output="output.out";
-	if(argc<2)
-	 usage(0);
-	for (i=1; i<argc; i++) {
-   	      if (argv[i][0]=='-')
-      		switch ( argv[i][1] )
-		{
-			case 'O':
-			output=argv[i+1];
-	  		break;
-			case 'I':
-			input=argv[i+1];
-			std_input = 0;
-	 		 break;
-      case 'n':
-      case 'p':
-      case 'N':
-      samples = atoi(argv[i+1]);
-        break;
-      case 't':
-      case 'T':
-      temperature = atof(argv[i+1]);// sscanf(argv[i+1], "%f", &temperature);
-      //printf("temper = %s %6.2f\n", argv[i+1], temperature);
-      update_fold_params();
-        break;
-      case 'h':
-      	usage(1);
-      	break;
-      case 'b':
-      case 'B':
-      betaScale = atof(argv[i+1]);// sscanf(argv[i+1], "%f", &temperature);
-      //printf("temper = %s %6.2f\n", argv[i+1], temperature);
-      //update_fold_params();
-        break;
-			default: usage(1);
-		}
-		}
-	update_fold_params();
-	if (std_input) fp = stdin;
-	else fp=fopen(input, "r");
-	fo=fopen(output, "w");
-// 	printf("# of seqs:"); scanf("%d", &n);
+	SEQ = NULL;
+	PARS = NULL;
+
+  // parse arguments
+  struct gengetopt_args_info args_info;
+  if (cmdline_parser(argc, argv, &args_info) != 0) {
+    fprintf(stderr, "ERROR: argument parsing problem.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // get parameters:
+  temperature = args_info.temperature_arg;
+  dangles = args_info.dangles_arg;
+  if (args_info.temperature_given || args_info.dangles_given) update_fold_params();
+  betaScale = args_info.betaScale_arg;
+  if (args_info.paramFile_given) read_parameter_file(args_info.paramFile_arg);
+
+  // open I/O
+	FILE *fp = stdin;
+	if (args_info.input_given) fp=fopen(args_info.input_arg, "r");
+	if (fp == NULL) {
+    fprintf(stderr, "ERROR: Cannot open file \"%s\" for input.", args_info.input_arg);
+    exit(EXIT_FAILURE);
+	}
+
+	fo=fopen(args_info.output_arg, "w");
+  if (fp == NULL) {
+    fprintf(stderr, "ERROR: Cannot open file \"%s\" for output.", args_info.output_arg);
+    exit(EXIT_FAILURE);
+	}
+
+  b1=args_info.Hpenalty_arg;
+  b1m=b1+args_info.multi_penalty_arg;
+  b1p=b1+args_info.pknot_penalty_arg;
+
+  b2=args_info.Kpenalty_arg;
+  b2m=b2+args_info.multi_penalty_arg;
+  b2p=b2+args_info.pknot_penalty_arg;
+
+  b3=args_info.Lpenalty_arg;
+  b3m=b3+args_info.multi_penalty_arg;
+  b3p=b3+args_info.pknot_penalty_arg;
+
+  b4=args_info.Mpenalty_arg;
+  b4m=b4+args_info.multi_penalty_arg;
+  b4p=b4+args_info.pknot_penalty_arg;
+
+  // 	printf("# of seqs:"); scanf("%d", &n);
 	while(!feof(fp)) {
-	  fscanf(fp, "%s\n%s\n%s\n", name,seq,natural);
+	  if (fscanf(fp, "%s\n%s\n%s\n", name,seq,natural) != 3) {
+      fprintf(stderr, "WARNING: input does not include full info: <name>, <seq>, <natural>.\n");
+	  }
 	  fprintf(fo, "%s\n", name);
 	  fprintf(fo, "%s\n", seq);
 	  fprintf(fo, "%s\n", natural);
-	  p_nat=structure2pair(natural);
-// 	  for (b1=500;b1<=800;b1+=50)
-// 	  for (b2=b1;b2<b1+500;b2+=50) {
-// 	    b1=810;
-	    b1=960;
-	    b1m=b1+540;
-	    b1p=b1+540;
-	    b2=1160;
-	    b2m=b2+540;
-	    b2p=b2+540;
-	    //b3=b2+100;
-	    b3=b2+200;
-	    b3m=b3+540;
-	    b3p=b3+540;
-	    b4=b2+500;
-	    b4m=b4+540;
-	    b4p=b4+540;
+	  p_nat = structure2pair(natural);
 
-	    fprintf(fo, "Parameters:\n");
-	    fprintf(fo, "B1=%d B1m=%d B1p=%d\n",b1,b1m,b1p);
-	    fprintf(fo, "B2=%d B2m=%d B2p=%d\n",b2,b2m,b2p);
-	    fprintf(fo, "B3=%d B3m=%d B3p=%d\n",b3,b3m,b3p);
-	    fprintf(fo, "B4=%d B4m=%d B4p=%d\n",b4,b4m,b4p);
+    fprintf(fo, "Parameters:\n");
+    fprintf(fo, "B1=%d B1m=%d B1p=%d\n",b1,b1m,b1p);
+    fprintf(fo, "B2=%d B2m=%d B2p=%d\n",b2,b2m,b2p);
+    fprintf(fo, "B3=%d B3m=%d B3p=%d\n",b3,b3m,b3p);
+    fprintf(fo, "B4=%d B4m=%d B4p=%d\n",b4,b4m,b4p);
 
-	    mfe=0;
-	    symbFold(seq);
-	    samplestructure(seq, samples);
-// 	  }
-	}
-end=clock();
-fprintf(stderr, "%f seconds\n",  (double)(end - start) / CLOCKS_PER_SEC);
+    mfe=0;
+    symbFold(seq);
+    if (args_info.sample_arg>0) samplestructure(seq, args_info.sample_arg);
+  }
+
+  end = clock();
+  fprintf(stderr, "%f seconds\n",  (double)(end - start) / CLOCKS_PER_SEC);
 	free(ptable);
 	free(p_nat);
-	if (!std_input) fclose (fp);
+	if (args_info.input_given) fclose (fp);
 	fclose (fo);
+
+	free(SEQ);
+	free(PARS);
+
+  cmdline_parser_free(&args_info);
 	return 0;
 }
 

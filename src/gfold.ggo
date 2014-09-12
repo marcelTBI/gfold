@@ -10,6 +10,11 @@ args "--file-name=gfold_cmdline --include-getopt --default-optional --unamed-opt
 
 # Options
 section "General options"
+option "output"             o "File for gfold output (not including generated structures)." string default="output.txt" no
+option "input"              i "File for input to gfold. If not specified, stdin is used." string no
+option "sample"             p "How many structures to sample. Structures are printed out to standard output." int default="0" no
+option "temperature"        t "Temperature used for scaling the energy parameters." float default="37.0" no
+option "betaScale"          b "Sampling temeprature scale used for sampling at higher energy levels. Does not change energies of structures.\nUseful levels are 1.0 (no-scaling) to ~3.0 (sampling temperature = 3*normal temperature))" float default="1.0" no
 option "paramFile"          P "Read energy parameters from paramfile, instead of using the default parameter set." string no
 option "dangles"            d "How to treat \"dangling end\" energies for bases adjacent to helices in free ends and multi-loops\n"
 details="\nWith -d1 only unpaired bases can participate in at most one dangling end, this is the\
@@ -20,4 +25,15 @@ details="\nWith -d1 only unpaired bases can participate in at most one dangling 
  moment the implementation will not allow coaxial stacking of the two interior pairs in a loop of degree 3\
  and works only for mfe folding.\n\nNote that by default (as well as with -d1 and -d3) pf and mfe folding\
  treat dangling ends differently. Use -d2 in addition to -p to ensure that both algorithms use the same\
- energy model.\n\n" int default="2" optional
+ energy model.\n\n" int default="0" optional
+
+option "Hpenalty"						H "Penalty for H-type pseudoknots." int default="960" no
+option "Kpenalty"						K "Penalty for K-type pseudoknots." int default="1160" no
+option "Lpenalty"						L "Penalty for L-type pseudoknots." int default="1360" no
+option "Mpenalty"						M "Penalty for M-type pseudoknots." int default="1660" no
+
+option "multi-penalty"			- "Additional penalty for being inside a multiloop." int default="540" no
+option "pknot-penalty"			- "Additional penalty for being inside a pseudoknot." int default="540" no
+
+section "Not done yet..."
+option "count"              - "Write number of possible structures in output." flag off
