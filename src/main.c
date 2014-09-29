@@ -254,6 +254,11 @@ int main(int argc, char **argv)
 	  if (scan != 3) {
       fprintf(stderr, "WARNING: input does not include full info: <name>, <seq>, <natural>.\n");
 	  }
+		if (scan == 1) {
+			strcpy(seq, name);
+			strcpy(name, ">unknown");
+		} 
+		
 	  fprintf(fo, "%s\n", name);
 	  fprintf(fo, "%s\n", seq);
 	  if (scan == 3) {
