@@ -250,13 +250,18 @@ int main(int argc, char **argv)
 
   // 	printf("# of seqs:"); scanf("%d", &n);
 	while(!feof(fp)) {
-	  if (fscanf(fp, "%s\n%s\n%s\n", name,seq,natural) != 3) {
+		int scan = fscanf(fp, "%s\n%s\n%s\n", name,seq,natural);
+	  if (scan != 3) {
       fprintf(stderr, "WARNING: input does not include full info: <name>, <seq>, <natural>.\n");
 	  }
 	  fprintf(fo, "%s\n", name);
 	  fprintf(fo, "%s\n", seq);
-	  fprintf(fo, "%s\n", natural);
-	  p_nat = structure2pair(natural);
+	  if (scan == 3) {
+			fprintf(fo, "%s\n", natural);
+		  p_nat = structure2pair(natural);
+		} else {
+			p_nat = NULL;
+		}
 
     fprintf(fo, "Parameters:\n");
     fprintf(fo, "B1=%d B1m=%d B1p=%d\n",b1,b1m,b1p);
@@ -272,7 +277,7 @@ int main(int argc, char **argv)
   end = clock();
   fprintf(stderr, "%f seconds\n",  (double)(end - start) / CLOCKS_PER_SEC);
 	free(ptable);
-	free(p_nat);
+	if (p_nat) free(p_nat);
 	if (args_info.input_given) fclose (fp);
 	fclose (fo);
 

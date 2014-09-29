@@ -1710,11 +1710,13 @@ char *samplestructure (char *seq, int samples)
 	    }
 	  }
 	  struc=pair2structure(sample);
-// 	  fprintf(fo, "%s  G:%d  EN:%d\n", struc,genusA+genusB+genusC+genusD, score);
-	  
-	  //test
-	  fprintf(stdout, "%s %6.2f\n", struc, score/100.0);
-	  //test
+		if (strlen(struc) != length) {
+			free(struc);		
+			i--;
+			continue; // simple roundabout around the bug that struc is sometimes corrupted...
+		} else {
+	 		fprintf(stdout, "%s %6.2f\n", struc, score/100.0);
+		}
 	  
 	  
 	  if (score < (int)(0.9*mfe) && !exist(struc) ) {
@@ -1781,37 +1783,39 @@ char *samplestructure (char *seq, int samples)
 	  }
 	}
 
-	struc=pair2structure(p5);
-	correct=compare(p5,p_nat);
-	total=number(p5);
- 	fprintf(fo, "P50  %s  CORRECT: %d  PPV: %f\n", struc, correct,
-		(double)correct/(double)total);
-	free(struc);
-	correct=compare(p8,p_nat);
-	total=number(p8);
-	struc=pair2structure(p8);
- 	fprintf(fo, "P80  %s  CORRECT: %d  PPV: %f\n", struc, correct,
-		(double)correct/(double)total);
-	free(struc);
-	correct=compare(p9,p_nat);
-	total=number(p9);
-	struc=pair2structure(p9);
- 	fprintf(fo, "P90  %s  CORRECT: %d  PPV: %f\n", struc, correct,
-		(double)correct/(double)total);
-	free(struc);
-	correct=compare(p95,p_nat);
-	total=number(p95);
-	struc=pair2structure(p95);
- 	fprintf(fo, "P95  %s  CORRECT: %d  PPV: %f\n", struc, correct,
-		(double)correct/(double)total);
-	free(struc);
-	correct=compare(p99,p_nat);
-	total=number(p99);
-	struc=pair2structure(p99);
- 	fprintf(fo, "P99  %s  CORRECT: %d  PPV: %f\n", struc, correct,
-		(double)correct/(double)total);
-	free(struc);
-	fprintf(fo, "\n");
+	if (p_nat) {
+		struc=pair2structure(p5);
+		correct=compare(p5,p_nat);
+		total=number(p5);
+	 	fprintf(fo, "P50  %s  CORRECT: %d  PPV: %f\n", struc, correct,
+			(double)correct/(double)total);
+		free(struc);
+		correct=compare(p8,p_nat);
+		total=number(p8);
+		struc=pair2structure(p8);
+	 	fprintf(fo, "P80  %s  CORRECT: %d  PPV: %f\n", struc, correct,
+			(double)correct/(double)total);
+		free(struc);
+		correct=compare(p9,p_nat);
+		total=number(p9);
+		struc=pair2structure(p9);
+	 	fprintf(fo, "P90  %s  CORRECT: %d  PPV: %f\n", struc, correct,
+			(double)correct/(double)total);
+		free(struc);
+		correct=compare(p95,p_nat);
+		total=number(p95);
+		struc=pair2structure(p95);
+	 	fprintf(fo, "P95  %s  CORRECT: %d  PPV: %f\n", struc, correct,
+			(double)correct/(double)total);
+		free(struc);
+		correct=compare(p99,p_nat);
+		total=number(p99);
+		struc=pair2structure(p99);
+	 	fprintf(fo, "P99  %s  CORRECT: %d  PPV: %f\n", struc, correct,
+			(double)correct/(double)total);
+		free(struc);
+		fprintf(fo, "\n");
+	}
 
 	index=stat;
 	while (index!=NULL) {

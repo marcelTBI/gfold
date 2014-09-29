@@ -1416,12 +1416,13 @@ void symbFold(char *seq)
 	mfe=I5[indx2[length]+1];
 
 	struc=pair2structure(ptable);
-	correct=compare(ptable, p_nat);
-	total=number(ptable);
-	total_nat=number(p_nat);
-	fprintf(fo, "%s  CORRECT: %d  MFEsen: %f PPV: %f\n", struc, correct,
+	if (p_nat) {
+		correct=compare(ptable, p_nat);
+		total=number(ptable);
+		total_nat=number(p_nat);
+		fprintf(fo, "%s  CORRECT: %d  MFEsen: %f PPV: %f\n", struc, correct,
 		 (double)correct/(double)total_nat, (double)correct/(double)total);
-
+	}
 // 	for (i=0;i<=length;i++)
 // 	  printf("%d  ", ptable[i]);
 // 	printf("\n");
