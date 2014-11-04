@@ -253,8 +253,11 @@ int main(int argc, char **argv)
   // 	printf("# of seqs:"); scanf("%d", &n);
 	while(!feof(fp)) {
 	 	if (fgets(name, MAX_LENGTH, fp) != NULL) {
+			name[strlen(name)-1] = '\0';
 			if (fgets(seq, MAX_LENGTH, fp) != NULL) {
+				seq[strlen(seq)-1] = '\0';
 				if (fgets(natural, MAX_LENGTH, fp) != NULL) {
+					natural[strlen(natural)-1] = '\0';
 		  		p_nat = structure2pair(natural);
 				} else {
 					fprintf(stderr, "WARNING: input does not include full info: <name>, <seq>, <natural>.\n");
@@ -264,9 +267,6 @@ int main(int argc, char **argv)
 				strcpy(seq, name);
 				strcpy(name, ">unknown");
 			}
-		} else {
-			fprintf(stderr, "ERROR: file empty...\n");
-			exit(EXIT_FAILURE);
 		}
 		
 	  fprintf(fo, "%s\n", name);
