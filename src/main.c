@@ -193,12 +193,14 @@ struct smth2 {
   int h;
 };
 
+#define MAX_LENGTH 300
+
 int main(int argc, char **argv)
 {
   clock_t start,end;
   start=clock();
   srand48(time(NULL));
-	char seq[300], name[100], natural[300], *input, *output;
+	char seq[MAX_LENGTH], name[MAX_LENGTH], natural[MAX_LENGTH], *input, *output;
 	int i,n;
 	betaScale = 1.0;
 	SEQ = NULL;
@@ -250,23 +252,28 @@ int main(int argc, char **argv)
 
   // 	printf("# of seqs:"); scanf("%d", &n);
 	while(!feof(fp)) {
-		int scan = fscanf(fp, "%s\n%s\n%s\n", name,seq,natural);
-	  if (scan != 3) {
-      fprintf(stderr, "WARNING: input does not include full info: <name>, <seq>, <natural>.\n");
-	  }
-		if (scan == 1) {
-			strcpy(seq, name);
-			strcpy(name, ">unknown");
-		} 
+	 	if (fgets(name, MAX_LENGTH, fp) != NULL) {
+			if (fgets(seq, MAX_LENGTH, fp) != NULL) {
+				if (fgets(natural, MAX_LENGTH, fp) != NULL) {
+		  		p_nat = structure2pair(natural);
+				} else {
+					fprintf(stderr, "WARNING: input does not include full info: <name>, <seq>, <natural>.\n");
+					p_nat = NULL;
+				}
+			} else {
+				strcpy(seq, name);
+				strcpy(name, ">unknown");
+			}
+		} else {
+			fprintf(stderr, "ERROR: file empty...\n");
+			exit(EXIT_FAILURE);
+		}
 		
 	  fprintf(fo, "%s\n", name);
 	  fprintf(fo, "%s\n", seq);
-	  if (scan == 3) {
+	  if (p_nat) {
 			fprintf(fo, "%s\n", natural);
-		  p_nat = structure2pair(natural);
-		} else {
-			p_nat = NULL;
-		}
+		} 
 
     fprintf(fo, "Parameters:\n");
     fprintf(fo, "B1=%d B1m=%d B1p=%d\n",b1,b1m,b1p);

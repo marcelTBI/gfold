@@ -28,9 +28,9 @@ details="\nWith -d1 only unpaired bases can participate in at most one dangling 
  energy model.\n\n" int default="0" optional
 
 option "Hpenalty"						H "Penalty for H-type pseudoknots." int default="960" no
-option "Kpenalty"						K "Penalty for K-type pseudoknots." int default="1160" no
-option "Lpenalty"						L "Penalty for L-type pseudoknots." int default="1360" no
-option "Mpenalty"						M "Penalty for M-type pseudoknots." int default="1660" no
+option "Kpenalty"						K "Penalty for K-type pseudoknots." int default="1260" no
+option "Lpenalty"						L "Penalty for L-type pseudoknots." int default="1460" no
+option "Mpenalty"						M "Penalty for M-type pseudoknots." int default="1760" no
 
 option "multi-penalty"			- "Additional penalty for being inside a multiloop." int default="540" no
 option "pknot-penalty"			- "Additional penalty for being inside a pseudoknot." int default="540" no
